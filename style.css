@@ -1,0 +1,351 @@
+* { box-sizing: border-box; }
+
+:root {
+  --cream: #FFF5EE;
+  --cream-deep: #FBE9DF;
+  --blush: #F7C6C7;
+  --raspberry: #C84B5A;
+  --raspberry-dark: #A53847;
+  --ink: #5A3E36;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Quicksand', sans-serif;
+  color: var(--ink);
+}
+
+body {
+  background: linear-gradient(160deg, var(--cream) 0%, var(--cream-deep) 55%, var(--blush) 100%);
+  position: relative;
+}
+
+/* ---------- Texture papier discrète ---------- */
+.paper-texture {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+.sprite-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---------- Cœurs SVG flottants en arrière-plan ---------- */
+.bg-hearts {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.bg-heart {
+  position: absolute;
+  bottom: -8%;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation-name: floatUp;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+
+@keyframes floatUp {
+  0%   { transform: translate(0,0) rotate(0deg); opacity: 0; }
+  10%  { opacity: var(--maxop, 0.6); }
+  100% { transform: translate(var(--dx, 20px), -112vh) rotate(var(--rot, 25deg)); opacity: 0; }
+}
+
+/* ---------- Écran d'accueil ---------- */
+.cover {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  cursor: pointer;
+  text-align: center;
+  padding: 22px;
+}
+
+.cover[hidden] { display: none; }
+
+.cover-heart .heart-icon {
+  width: 84px;
+  height: 76px;
+}
+.cover-heart .heart-icon use { fill: var(--raspberry); }
+
+.cover-text {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.1rem, 4.5vw, 1.6rem);
+  color: var(--raspberry-dark);
+  margin: 0;
+}
+
+/* ---------- Bouton son discret ---------- */
+.sound-toggle {
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  z-index: 21;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(90, 62, 54, 0.18);
+  opacity: 0.75;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.sound-toggle:hover { opacity: 1; transform: scale(1.08); }
+.sound-toggle[hidden] { display: none; }
+
+/* ---------- Mise en page générale ---------- */
+.stage {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+}
+
+.container, .game-screen, .success {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  text-align: center;
+}
+
+.container[hidden], .game-screen[hidden], .success[hidden] { display: none; }
+
+h1.title {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  color: var(--raspberry-dark);
+  font-size: clamp(2.3rem, 7.5vw, 3.9rem);
+  text-shadow: 0 2px 8px rgba(255,255,255,0.6);
+  margin: 0 0 10px;
+  max-width: 92vw;
+  line-height: 1.2;
+  transform: translateX(-8px) rotate(-1.2deg);
+}
+
+.subtitle {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 600;
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  color: var(--ink);
+  opacity: 0.7;
+  margin: 0 0 44px;
+  transform: translateX(6px) rotate(0.5deg);
+}
+
+.buttons {
+  position: relative;
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-height: 120px;
+  width: 100%;
+}
+
+.btn {
+  border: none;
+  font-family: 'Quicksand', sans-serif;
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-weight: 700;
+  padding: 15px 38px;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(90, 62, 54, 0.2);
+  transition: box-shadow 0.3s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn.yes {
+  background: var(--raspberry);
+  color: var(--cream);
+  border-radius: 24px 8px 26px 10px;
+}
+.btn.yes:hover {
+  box-shadow: 0 12px 22px rgba(168, 56, 71, 0.4);
+}
+
+.btn.no {
+  background: var(--blush);
+  color: var(--raspberry-dark);
+  border-radius: 10px 26px 8px 24px;
+  position: relative;
+}
+.btn.no:hover {
+  box-shadow: 0 12px 22px rgba(199, 130, 134, 0.4);
+}
+
+.btn.no.gone { pointer-events: none; }
+
+/* ---------- Écrans mini-jeux ---------- */
+.game-title {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  color: var(--raspberry-dark);
+  font-size: clamp(1.6rem, 6vw, 2.5rem);
+  margin: 4px 0 4px;
+  text-shadow: 0 2px 8px rgba(255,255,255,0.6);
+}
+
+.game-sub {
+  margin: 0 0 6px;
+  opacity: 0.75;
+  font-size: 0.95rem;
+}
+
+.game-counter {
+  font-weight: 700;
+  color: var(--raspberry-dark);
+  margin: 0 0 8px;
+}
+
+/* Mini-jeu : attrape les cœurs */
+#catchArea {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  touch-action: none;
+  overflow: hidden;
+}
+
+.basket {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  width: 64px;
+  height: 52px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  filter: drop-shadow(0 4px 6px rgba(90,62,54,0.3));
+}
+.basket svg { width: 100%; height: 100%; }
+.basket-handle { fill: none; stroke: var(--raspberry-dark); stroke-width: 2.5; stroke-linecap: round; }
+.basket-body { fill: var(--blush); stroke: var(--raspberry-dark); stroke-width: 2; }
+.basket-weave { fill: none; stroke: var(--raspberry-dark); stroke-width: 1.4; opacity: 0.6; }
+
+.falling-heart {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+}
+
+/* Mini-jeu : pop les cœurs */
+#popArea {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  touch-action: none;
+}
+
+.bubble {
+  position: absolute;
+  cursor: pointer;
+  user-select: none;
+  animation: bobble 2.4s ease-in-out infinite;
+}
+
+@keyframes bobble {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.bubble.popped {
+  animation: popOut 0.25s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes popOut {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* ---------- Cœurs (icônes SVG réutilisées) ---------- */
+.heart-icon {
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(90,62,54,0.18));
+}
+
+/* ---------- Écran de succès ---------- */
+.big-message {
+  position: relative;
+  z-index: 6;
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  color: var(--raspberry-dark);
+  font-size: clamp(2.1rem, 11vw, 4.8rem);
+  text-align: center;
+  padding: 0 20px;
+  text-shadow: 0 4px 16px rgba(255,255,255,0.8);
+}
+
+.rain-heart {
+  position: absolute;
+  top: -12%;
+  z-index: 4;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation-name: fallDown;
+  animation-timing-function: linear;
+}
+
+@keyframes fallDown {
+  0%   { transform: translate(0,0) rotate(0deg); opacity: var(--maxop, 1); }
+  100% { transform: translate(var(--dx, 0px), 118vh) rotate(var(--rot, 360deg)); opacity: 0.85; }
+}
+
+.heart-photo {
+  width: 100px;
+  height: 90px;
+  background-size: cover;
+  background-position: center;
+  clip-path: path("M50,90 C20,65 0,45 0,25 C0,10 12,0 25,0 C35,0 45,7 50,20 C55,7 65,0 75,0 C88,0 100,10 100,25 C100,45 80,65 50,90 Z");
+}
+
+.photo-wrapper {
+  filter: drop-shadow(0 5px 8px rgba(90,40,50,0.35));
+}
+
+.signature {
+  position: fixed;
+  bottom: 10px;
+  right: 16px;
+  z-index: 7;
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  color: var(--raspberry-dark);
+  opacity: 0.5;
+  pointer-events: none;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .btn { padding: 13px 26px; }
+  .subtitle { margin-bottom: 36px; }
+  h1.title { transform: translateX(-4px) rotate(-1deg); }
+}

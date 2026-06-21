@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Veux-tu être ma copine ?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="paper-texture"></div>
+
+  <svg class="sprite-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="heart-shape" viewBox="0 0 32 29">
+        <path d="M16 29C16 29 2 18.6 2 9.7C2 4.3 6.1 1 10.6 1C13.1 1 15.1 2.5 16 5C16.9 2.5 18.9 1 21.4 1C25.9 1 30 4.3 30 9.7C30 18.6 16 29 16 29Z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="bg-hearts" id="bgHearts"></div>
+
+  <section class="cover" id="coverScreen">
+    <div class="cover-heart" id="coverHeart">
+      <svg viewBox="0 0 32 29" class="heart-icon"><use href="#heart-shape"></use></svg>
+    </div>
+    <p class="cover-text">Clique pour commencer 💕</p>
+  </section>
+
+  <audio id="bgMusic" src="music/song.mp3" preload="auto" loop></audio>
+  <button class="sound-toggle" id="soundToggle" aria-label="Couper le son" hidden>🔊</button>
+
+  <main class="stage">
+
+    <section class="container" id="mainContent" hidden>
+      <h1 class="title" id="title">Veux-tu être ma copine, Anahit ? 💕</h1>
+      <p class="subtitle" id="subtitleEl">(prends ton temps, mais pas trop 😌)</p>
+      <div class="buttons">
+        <button class="btn yes" id="yesBtn">Oui</button>
+        <button class="btn no" id="noBtn">Non</button>
+      </div>
+    </section>
+
+    <section class="game-screen" id="gameCatch" hidden>
+      <h2 class="game-title">Mini-jeu : attrape les cœurs</h2>
+      <p class="game-sub">Bouge la souris ou le doigt pour attraper 5 cœurs avec le panier.</p>
+      <p class="game-counter" id="catchCounter">0 / 5 cœurs attrapés</p>
+      <div id="catchArea">
+        <div class="basket" id="basket">
+          <svg viewBox="0 0 64 52">
+            <path class="basket-handle" d="M16 19C16 6 48 6 48 19" />
+            <path class="basket-body" d="M9 19L55 19L47 47Q32 51 17 47Z" />
+            <path class="basket-weave" d="M13 28Q32 33 51 28" />
+            <path class="basket-weave" d="M15.5 38Q32 42.5 48.5 38" />
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="game-screen" id="gamePop" hidden>
+      <h2 class="game-title">Mini-jeu : pop les cœurs</h2>
+      <p class="game-sub">Éclate-les tous avant de continuer.</p>
+      <p class="game-counter" id="popCounter">14 cœurs à éclater</p>
+      <div id="popArea"></div>
+    </section>
+
+    <section class="success" id="successScreen" hidden>
+      <h1 class="big-message">OUIII T'AS ACCEPTÉ !!! 🎉❤️</h1>
+    </section>
+
+  </main>
+
+  <p class="signature">avec amour ✦</p>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
