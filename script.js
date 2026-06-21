@@ -515,45 +515,81 @@
     easing: 'easeInOutSine'
   });
 
-  /* Amplification du son via Web Audio API (gain x2, au-delà du volume HTML max) */
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  /* Amplification du son via Web Audio API (gain x2). Désactivée sur iOS :
+     le mode silencieux y coupe la sortie de Web Audio mais pas l'élément <audio>,
+     donc on laisse l'audio jouer nativement (volume 1.0) pour garantir le son. */
   let audioCtx = null;
   let gainNode = null;
 
   function setupAudioBoost() {
-    if (audioCtx) return;
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    audioCtx = new AudioCtx();
-    const source = audioCtx.createMediaElementSource(bgMusic);
-    gainNode = audioCtx.createGain();
-    gainNode.gain.value = 2.0;
-    source.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    if (audioCtx || isIOS()) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      audioCtx = new AudioCtx();
+      const source = audioCtx.createMediaElementSource(bgMusic);
+      gainNode = audioCtx.createGain();
+      gainNode.gain.value = 2.0;
+      source.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+    } catch (err) {
+      audioCtx = null;
+      gainNode = null;
+    }
   }
 
-  function startMusic() {
+  /* iOS ignore currentTime tant que les métadonnées ne sont pas chargées :
+     on attend loadedmetadata/canplay plutôt que de le fixer trop tôt. */
+  let seekApplied = false;
+  function applySeek() {
+    if (seekApplied || bgMusic.readyState < 1) return;
+    bgMusic.currentTime = MUSIC_START_TIME;
+    seekApplied = true;
+  }
+  bgMusic.addEventListener('loadedmetadata', applySeek);
+  bgMusic.addEventListener('canplay', applySeek);
+
+  function updateSoundIcon() {
+    soundToggle.textContent = (bgMusic.muted || bgMusic.paused) ? '🔇' : '🔊';
+  }
+
+  function attemptPlay() {
     setupAudioBoost();
     if (audioCtx && audioCtx.state === 'suspended') {
       audioCtx.resume().catch(() => {});
     }
     bgMusic.loop = true;
     bgMusic.volume = 1.0;
-    const seekTo197 = () => { bgMusic.currentTime = MUSIC_START_TIME; };
-    if (bgMusic.readyState >= 1) {
-      seekTo197();
-    } else {
-      bgMusic.addEventListener('loadedmetadata', seekTo197, { once: true });
+    applySeek();
+
+    const playPromise = bgMusic.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      playPromise.then(updateSoundIcon).catch(() => {
+        // play() rejeté (geste non reconnu, interruption...) : on retente au prochain tap.
+        document.addEventListener('touchend', attemptPlay, { once: true });
+        document.addEventListener('click', attemptPlay, { once: true });
+      });
     }
-    bgMusic.play().catch(() => {});
+    updateSoundIcon();
   }
 
   soundToggle.addEventListener('click', () => {
-    bgMusic.muted = !bgMusic.muted;
-    soundToggle.textContent = bgMusic.muted ? '🔇' : '🔊';
+    if (bgMusic.paused) {
+      bgMusic.muted = false;
+      attemptPlay();
+    } else {
+      bgMusic.muted = !bgMusic.muted;
+      updateSoundIcon();
+    }
   });
 
   coverScreen.addEventListener('click', () => {
-    startMusic();
+    attemptPlay();
     soundToggle.hidden = false;
     anime.remove(coverHeart);
     anime({
