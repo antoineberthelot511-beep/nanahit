@@ -300,6 +300,13 @@
     basket.style.left = x + 'px';
   }
 
+  function onCatchTouchMove(e) {
+    if (e.touches && e.touches.length > 0) {
+      e.preventDefault();
+      onCatchPointerMove(e.touches[0]);
+    }
+  }
+
   function spawnFallingHeart() {
     const size = 24 + Math.random() * 10;
     const fill = HEART_TONES[Math.floor(Math.random() * HEART_TONES.length)];
@@ -357,6 +364,7 @@
     updateCatchCounter();
     basket.style.left = '50%';
     catchArea.addEventListener('pointermove', onCatchPointerMove);
+    catchArea.addEventListener('touchmove', onCatchTouchMove, { passive: false });
     catchSpawnInterval = setInterval(spawnFallingHeart, 650);
     catchRaf = requestAnimationFrame(catchLoop);
   }
@@ -365,6 +373,7 @@
     clearInterval(catchSpawnInterval);
     cancelAnimationFrame(catchRaf);
     catchArea.removeEventListener('pointermove', onCatchPointerMove);
+    catchArea.removeEventListener('touchmove', onCatchTouchMove);
     catchHearts.forEach((h) => h.el.remove());
     catchHearts = [];
   }
@@ -384,6 +393,7 @@
   function onPopBubble(e) {
     e.preventDefault();
     const el = e.currentTarget;
+    if (el.classList.contains('popped')) return;
     el.classList.add('popped');
     popRemaining--;
     updatePopCounter();
@@ -413,7 +423,8 @@
       svg.style.left = x + 'px';
       svg.style.top = y + 'px';
       svg.style.animationDelay = (Math.random() * 2) + 's';
-      svg.addEventListener('pointerdown', onPopBubble, { once: true });
+      svg.addEventListener('pointerdown', onPopBubble);
+      svg.addEventListener('touchstart', onPopBubble, { passive: false });
       popArea.appendChild(svg);
     }
   }
@@ -504,7 +515,27 @@
     easing: 'easeInOutSine'
   });
 
+  /* Amplification du son via Web Audio API (gain x2, au-delà du volume HTML max) */
+  let audioCtx = null;
+  let gainNode = null;
+
+  function setupAudioBoost() {
+    if (audioCtx) return;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    audioCtx = new AudioCtx();
+    const source = audioCtx.createMediaElementSource(bgMusic);
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = 2.0;
+    source.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+  }
+
   function startMusic() {
+    setupAudioBoost();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
     bgMusic.loop = true;
     bgMusic.volume = 1.0;
     const seekTo197 = () => { bgMusic.currentTime = MUSIC_START_TIME; };

@@ -100,8 +100,8 @@ body {
   bottom: 14px;
   left: 14px;
   z-index: 21;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.55);
@@ -111,6 +111,7 @@ body {
   box-shadow: 0 4px 10px rgba(90, 62, 54, 0.18);
   opacity: 0.75;
   transition: opacity 0.2s, transform 0.2s;
+  touch-action: manipulation;
 }
 .sound-toggle:hover { opacity: 1; transform: scale(1.08); }
 .sound-toggle[hidden] { display: none; }
@@ -140,7 +141,7 @@ h1.title {
   font-family: 'Caveat', cursive;
   font-weight: 700;
   color: var(--raspberry-dark);
-  font-size: clamp(2.3rem, 7.5vw, 3.9rem);
+  font-size: clamp(1.9rem, 8vw, 3.9rem);
   text-shadow: 0 2px 8px rgba(255,255,255,0.6);
   margin: 0 0 10px;
   max-width: 92vw;
@@ -175,11 +176,14 @@ h1.title {
   font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: 700;
   padding: 15px 38px;
+  min-height: 48px;
+  min-width: 100px;
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(90, 62, 54, 0.2);
   transition: box-shadow 0.3s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .btn.yes {
@@ -267,6 +271,7 @@ h1.title {
   position: absolute;
   cursor: pointer;
   user-select: none;
+  touch-action: manipulation;
   animation: bobble 2.4s ease-in-out infinite;
 }
 
@@ -346,6 +351,9 @@ h1.title {
 
 @media (max-width: 480px) {
   .btn { padding: 13px 26px; }
+  .buttons { gap: 18px; }
   .subtitle { margin-bottom: 36px; }
   h1.title { transform: translateX(-4px) rotate(-1deg); }
+  .heart-photo { width: 76px; height: 68px; }
+  .game-title { margin-top: 8px; }
 }
