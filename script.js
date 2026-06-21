@@ -554,8 +554,21 @@
   bgMusic.addEventListener('loadedmetadata', applySeek);
   bgMusic.addEventListener('canplay', applySeek);
 
-  function updateSoundIcon() {
-    soundToggle.textContent = (bgMusic.muted || bgMusic.paused) ? '🔇' : '🔊';
+  /* État du son piloté explicitement (pas via bgMusic.paused/muted, qui changent
+     de façon asynchrone et causaient un décalage avec l'icône affichée).
+     Le son démarre ACTIVÉ. */
+  let soundOn = true;
+
+  function setIcon() {
+    soundToggle.textContent = soundOn ? '🔊' : '🔇';
+  }
+  setIcon();
+
+  function applyMuteState() {
+    bgMusic.muted = !soundOn;
+    if (gainNode) {
+      gainNode.gain.value = soundOn ? 2.0 : 0;
+    }
   }
 
   function attemptPlay() {
@@ -565,28 +578,31 @@
     }
     bgMusic.loop = true;
     bgMusic.volume = 1.0;
+    applyMuteState();
     applySeek();
 
     const playPromise = bgMusic.play();
     if (playPromise && typeof playPromise.then === 'function') {
-      playPromise.then(updateSoundIcon).catch(() => {
+      playPromise.catch(() => {
         // play() rejeté (geste non reconnu, interruption...) : on retente au prochain tap.
         document.addEventListener('touchend', attemptPlay, { once: true });
         document.addEventListener('click', attemptPlay, { once: true });
       });
     }
-    updateSoundIcon();
   }
 
-  soundToggle.addEventListener('click', () => {
-    if (bgMusic.paused) {
-      bgMusic.muted = false;
-      attemptPlay();
-    } else {
-      bgMusic.muted = !bgMusic.muted;
-      updateSoundIcon();
-    }
-  });
+  function toggleSound() {
+    soundOn = !soundOn;
+    applyMuteState();
+    if (soundOn && bgMusic.paused) attemptPlay();
+    setIcon();
+  }
+
+  soundToggle.addEventListener('click', toggleSound);
+  soundToggle.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    toggleSound();
+  }, { passive: false });
 
   coverScreen.addEventListener('click', () => {
     attemptPlay();

@@ -94,24 +94,30 @@ body {
   margin: 0;
 }
 
-/* ---------- Bouton son discret ---------- */
+/* ---------- Bouton son ---------- */
 .sound-toggle {
   position: fixed;
-  bottom: 14px;
-  left: 14px;
-  z-index: 21;
+  top: 14px;
+  right: 14px;
+  z-index: 1000;
   width: 44px;
   height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
-  font-size: 1.05rem;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 1.2rem;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(90, 62, 54, 0.18);
-  opacity: 0.75;
+  box-shadow: 0 4px 12px rgba(90, 62, 54, 0.25);
+  opacity: 0.95;
   transition: opacity 0.2s, transform 0.2s;
   touch-action: manipulation;
+  pointer-events: auto;
 }
 .sound-toggle:hover { opacity: 1; transform: scale(1.08); }
 .sound-toggle[hidden] { display: none; }
