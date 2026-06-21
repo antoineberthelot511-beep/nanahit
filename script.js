@@ -435,7 +435,7 @@
   function fireConfetti() {
     if (!heartShape && confetti.shapeFromPath) {
       heartShape = confetti.shapeFromPath({
-        path: 'M16 29C16 29 2 18.6 2 9.7C2 4.3 6.1 1 10.6 1C13.1 1 15.1 2.5 16 5C16.9 2.5 18.9 1 21.4 1C25.9 1 30 4.3 30 9.7C30 18.6 16 29 16 29Z'
+        path: 'M16 27.5C13.6 25.3 2 15.6 2 8.7C2 4.1 5.7 1 10 1C13 1 15.4 3 16 5.8C16.6 3 19 1 22 1C26.3 1 30 4.1 30 8.7C30 15.6 18.4 25.3 16 27.5Z'
       });
     }
     const opts = {
