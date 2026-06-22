@@ -498,6 +498,10 @@ export default function Page() {
           <symbol id="heart-shape" viewBox="0 0 32 29">
             <path d="M16 27.5C13.6 25.3 2 15.6 2 8.7C2 4.1 5.7 1 10 1C13 1 15.4 3 16 5.8C16.6 3 19 1 22 1C26.3 1 30 4.1 30 8.7C30 15.6 18.4 25.3 16 27.5Z" />
           </symbol>
+          {/* coordonnées normalisées 0→1 : s'adapte à toute taille sans couture */}
+          <clipPath id="heart-clip" clipPathUnits="objectBoundingBox">
+            <path d="M0.5,0.95 C0.5,0.95 0.05,0.65 0.05,0.35 C0.05,0.18 0.2,0.08 0.33,0.13 C0.41,0.16 0.47,0.24 0.5,0.3 C0.53,0.24 0.59,0.16 0.67,0.13 C0.8,0.08 0.95,0.18 0.95,0.35 C0.95,0.65 0.5,0.95 0.5,0.95 Z" />
+          </clipPath>
         </defs>
       </svg>
 

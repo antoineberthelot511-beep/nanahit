@@ -309,7 +309,7 @@ h1.title {
   height: 90px;
   background-size: cover;
   background-position: center;
-  clip-path: path("M50,90 C20,65 0,45 0,25 C0,10 12,0 25,0 C35,0 45,7 50,20 C55,7 65,0 75,0 C88,0 100,10 100,25 C100,45 80,65 50,90 Z");
+  clip-path: url(#heart-clip);
 }
 
 .photo-wrapper {
