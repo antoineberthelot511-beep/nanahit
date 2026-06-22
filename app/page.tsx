@@ -516,7 +516,7 @@ export default function Page() {
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         id="bgMusic"
-        src="/music/song.mp3"
+        src="/music/song.mp4"
         preload="auto"
         loop
         playsInline
