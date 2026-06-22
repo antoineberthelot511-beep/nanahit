@@ -403,8 +403,11 @@ export default function Page() {
       const coverScreen = document.getElementById('coverScreen') as HTMLElement;
       const coverHeart = document.getElementById('coverHeart') as HTMLElement;
       const soundToggle = document.getElementById('soundToggle') as HTMLButtonElement;
-      const bgMusic = document.getElementById('bgMusic') as HTMLAudioElement;
+      const bgMusic = document.getElementById('bgMusic') as HTMLVideoElement;
       const MUSIC_START_TIME = 197;
+
+      /* webkit-playsinline requis pour vieux Safari iOS */
+      bgMusic.setAttribute('webkit-playsinline', '');
 
       anime({
         targets: coverHeart,
@@ -414,34 +417,6 @@ export default function Page() {
         loop: true,
         easing: 'easeInOutSine',
       });
-
-      function isIOS() {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-          ((navigator as any).platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      }
-
-      let audioCtx: AudioContext | null = null;
-      let gainNode: GainNode | null = null;
-
-      function setupAudioBoost() {
-        if (audioCtx || isIOS()) return;
-        try {
-          const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
-          if (!AudioCtxClass) return;
-          const ctx = new AudioCtxClass() as AudioContext;
-          if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-          const source = ctx.createMediaElementSource(bgMusic);
-          gainNode = ctx.createGain();
-          gainNode.gain.value = 2.0;
-          source.connect(gainNode);
-          gainNode.connect(ctx.destination);
-          audioCtx = ctx;
-        } catch (err: any) {
-          console.log('[Audio] Web Audio boost ignoré :', err.message);
-          audioCtx = null;
-          gainNode = null;
-        }
-      }
 
       let seekApplied = false;
 
@@ -467,7 +442,6 @@ export default function Page() {
 
       function applyMuteState() {
         bgMusic.muted = !soundOn;
-        if (gainNode) gainNode.gain.value = soundOn ? 2.0 : 0;
       }
 
       function attemptPlay() {
@@ -477,12 +451,8 @@ export default function Page() {
 
         const playPromise = bgMusic.play();
         if (playPromise && typeof playPromise.then === 'function') {
-          playPromise.then(() => {
-            setupAudioBoost();
-          }).catch((err: Error) => {
+          playPromise.catch((err: Error) => {
             console.warn('[Audio] play() rejeté :', err.message);
-            document.addEventListener('touchend', attemptPlay, { once: true });
-            document.addEventListener('click', attemptPlay, { once: true });
           });
         }
       }
@@ -542,8 +512,16 @@ export default function Page() {
         <p className="cover-text">Clique pour commencer 💕</p>
       </section>
 
+      {/* vidéo cachée — contourne le mode silencieux iOS (audio seul bloqué, vidéo non) */}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <audio id="bgMusic" src="/music/song.mp3" preload="auto" loop playsInline />
+      <video
+        id="bgMusic"
+        src="/music/song.mp3"
+        preload="auto"
+        loop
+        playsInline
+        style={{ position: 'fixed', width: 0, height: 0, opacity: 0, pointerEvents: 'none' }}
+      />
       <button className="sound-toggle" id="soundToggle" aria-label="Couper le son" hidden>
         🔊
       </button>
