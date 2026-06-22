@@ -3,6 +3,17 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Mystère et boule de gomme',
+  description: 'Clique pour découvrir 🤫',
+  openGraph: {
+    title: 'Mystère et boule de gomme',
+    description: 'Clique pour découvrir 🤫',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Mystère et boule de gomme',
+    description: 'Clique pour découvrir 🤫',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
