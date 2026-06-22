@@ -134,7 +134,7 @@ body {
   height: 100%;
 }
 
-.container, .game-screen, .success {
+.container, .success {
   position: fixed;
   inset: 0;
   display: flex;
@@ -145,7 +145,39 @@ body {
   text-align: center;
 }
 
-.container[hidden], .game-screen[hidden], .success[hidden] { display: none; }
+.container[hidden], .success[hidden] { display: none; }
+
+/* ---------- Quiz --------- */
+h1.quiz-title {
+  font-size: clamp(1.4rem, 5.5vw, 2.6rem);
+  margin-bottom: 28px;
+}
+
+.quiz-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;
+  margin-bottom: 18px;
+}
+
+.quiz-answers .btn {
+  width: 100%;
+  max-width: 340px;
+}
+
+.quiz-feedback {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--raspberry-dark);
+  min-height: 1.4em;
+  margin: 0;
+}
+
+.quiz-feedback[hidden] { display: none; }
 
 h1.title {
   font-family: 'Caveat', cursive;

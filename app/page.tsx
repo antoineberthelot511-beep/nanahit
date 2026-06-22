@@ -23,8 +23,9 @@ export default function Page() {
         return svg;
       }
 
-      /* ============ Cœurs SVG flottants en fond ============ */
+      /* ============ Cœurs SVG flottants — déclenchés uniquement à la demande ============ */
       const bgHearts = document.getElementById('bgHearts')!;
+      let heartsSpawned = false;
 
       function spawnBgHeart() {
         const size = 10 + Math.random() * 26;
@@ -41,7 +42,11 @@ export default function Page() {
         bgHearts.appendChild(svg);
       }
 
-      for (let i = 0; i < 22; i++) spawnBgHeart();
+      function showHeartsBg() {
+        if (heartsSpawned) return;
+        heartsSpawned = true;
+        for (let i = 0; i < 22; i++) spawnBgHeart();
+      }
 
       /* ============ Éléments communs ============ */
       const titleEl = document.getElementById('title') as HTMLElement;
@@ -49,10 +54,11 @@ export default function Page() {
       const noBtn = document.getElementById('noBtn') as HTMLButtonElement;
       const yesBtn = document.getElementById('yesBtn') as HTMLButtonElement;
       const mainContent = document.getElementById('mainContent') as HTMLElement;
-      const gamePop = document.getElementById('gamePop') as HTMLElement;
+      const quizScreen = document.getElementById('quizScreen') as HTMLElement;
+      const quizFeedback = document.getElementById('quizFeedback') as HTMLElement;
       const successScreen = document.getElementById('successScreen') as HTMLElement;
 
-      /* Pulsation douce et continue du titre */
+      /* Pulsation douce du titre principal */
       anime({
         targets: titleEl,
         scale: [1, 1.035],
@@ -73,7 +79,7 @@ export default function Page() {
       let isFleeing = false;
       let hasEscapedOnce = false;
       let noVisible = true;
-      let onQuestionScreen = true;
+      let onQuestionScreen = false;
 
       function lockNoBtnPosition() {
         const rect = noBtn.getBoundingClientRect();
@@ -190,30 +196,35 @@ export default function Page() {
         noBtn.style.top = Math.min(curTop, maxY) + 'px';
       });
 
-      /* ============ Séquence complète : questions + mini-jeux + fin ============ */
-      const subtitles = [
-        "(prends ton temps, mais pas trop 😌)",
-        "(c'est officiel, y'a pas de retour en arrière après ça 👀)",
-        "(je commence à stresser un peu là 😅)",
-        "(dernière chance de me dire la vérité 💗)",
-      ];
-      const steps = [
-        "Veux-tu être ma copine, Anahit ? 💕",
-        "Es-tu vraiment sûre ? 🥺",
-        "Mais vraiment vraiment sûre ?! 😳",
-        "Genre sûre sûre sûre ?!! 💗",
-      ];
+      /* ============ Quiz ============ */
+      const quizBtnWrong1 = document.getElementById('quizBtnWrong1') as HTMLButtonElement;
+      const quizBtnWrong2 = document.getElementById('quizBtnWrong2') as HTMLButtonElement;
+      const quizBtnRight = document.getElementById('quizBtnRight') as HTMLButtonElement;
 
-      const sequence = [
-        { type: 'question', text: steps[0], sub: subtitles[0] },
-        { type: 'question', text: steps[1], sub: subtitles[1] },
-        { type: 'question', text: steps[2], sub: subtitles[2] },
-        { type: 'question', text: steps[3], sub: subtitles[3] },
+      function showQuizFeedback(msg: string) {
+        quizFeedback.textContent = msg;
+        quizFeedback.hidden = false;
+        anime({ targets: quizFeedback, opacity: [0, 1], translateY: [-6, 0], duration: 300, easing: 'easeOutCubic' });
+      }
+
+      quizBtnWrong1.addEventListener('click', () => showQuizFeedback("Bonne idée mais non 😅 réessaie !"));
+      quizBtnWrong2.addEventListener('click', () => showQuizFeedback("Sympa comme idée... mais non 😏 réessaie !"));
+      quizBtnRight.addEventListener('click', () => goToNext());
+
+      /* ============ Séquence ============ */
+      type SeqItem = { type: string; text?: string; sub?: string; showHearts?: boolean };
+
+      const sequence: SeqItem[] = [
+        { type: 'quiz' },
+        { type: 'question', text: "T'es sûre que tu veux savoir ? 😏", sub: "(réfléchis bien... 👀)", showHearts: false },
+        { type: 'question', text: "Vraiment vraiment sûre ?!", sub: "(c'est maintenant ou jamais 😅)", showHearts: false },
+        { type: 'question', text: "Veux-tu être ma copine, Anahit ? 💕", sub: "(prends ton temps, mais pas trop 😌)", showHearts: true },
         { type: 'final' },
       ];
       let seqIndex = 0;
 
       const screenEls: Record<string, HTMLElement> = {
+        quiz: quizScreen,
         question: mainContent,
         final: successScreen,
       };
@@ -246,12 +257,18 @@ export default function Page() {
         const nextEl = screenEls[item.type];
         onQuestionScreen = (item.type === 'question');
 
+        if (item.showHearts) showHeartsBg();
+
         const reveal = () => {
-          if (item.type === 'question') {
+          if (item.type === 'quiz') {
+            quizFeedback.hidden = true;
+            quizFeedback.textContent = '';
+          } else if (item.type === 'question') {
             titleEl.textContent = item.text!;
             subtitleEl.textContent = item.sub!;
             resetNoYesButtons();
           } else if (item.type === 'final') {
+            showHeartsBg();
             startFinale();
           }
           showScreen(nextEl);
@@ -352,7 +369,6 @@ export default function Page() {
       const bgMusic = document.getElementById('bgMusic') as HTMLVideoElement;
       const MUSIC_START_TIME = 197;
 
-      /* webkit-playsinline requis pour vieux Safari iOS */
       bgMusic.setAttribute('webkit-playsinline', '');
 
       anime({
@@ -444,7 +460,6 @@ export default function Page() {
           <symbol id="heart-shape" viewBox="0 0 32 29">
             <path d="M16 27.5C13.6 25.3 2 15.6 2 8.7C2 4.1 5.7 1 10 1C13 1 15.4 3 16 5.8C16.6 3 19 1 22 1C26.3 1 30 4.1 30 8.7C30 15.6 18.4 25.3 16 27.5Z" />
           </symbol>
-          {/* coordonnées normalisées 0→1 : s'adapte à toute taille sans couture */}
           <clipPath id="heart-clip" clipPathUnits="objectBoundingBox">
             <path d="M0.5,0.95 C0.5,0.95 0.05,0.65 0.05,0.35 C0.05,0.18 0.2,0.08 0.33,0.13 C0.41,0.16 0.47,0.24 0.5,0.3 C0.53,0.24 0.59,0.16 0.67,0.13 C0.8,0.08 0.95,0.18 0.95,0.35 C0.95,0.65 0.5,0.95 0.5,0.95 Z" />
           </clipPath>
@@ -462,7 +477,6 @@ export default function Page() {
         <p className="cover-text">Clique pour commencer 💕</p>
       </section>
 
-      {/* vidéo cachée — contourne le mode silencieux iOS (audio seul bloqué, vidéo non) */}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         id="bgMusic"
@@ -477,6 +491,21 @@ export default function Page() {
       </button>
 
       <main className="stage">
+
+        {/* Étape 2 : quiz */}
+        <section className="container" id="quizScreen" hidden>
+          <h1 className="title quiz-title">
+            Pourquoi j&apos;avais fait des captures d&apos;écran ? 🤔
+          </h1>
+          <div className="quiz-answers">
+            <button className="btn no" id="quizBtnWrong1">Les envoyer à Suzon</button>
+            <button className="btn no" id="quizBtnWrong2">Pour en faire des stickers</button>
+            <button className="btn no" id="quizBtnRight">Encore mystère et boule de gomme</button>
+          </div>
+          <p className="quiz-feedback" id="quizFeedback" hidden />
+        </section>
+
+        {/* Étapes 3 & 4 : confirmations + demande principale */}
         <section className="container" id="mainContent" hidden>
           <h1 className="title" id="title">
             Veux-tu être ma copine, Anahit ? 💕
@@ -490,9 +519,11 @@ export default function Page() {
           </div>
         </section>
 
+        {/* Étape 5 : finale */}
         <section className="success" id="successScreen" hidden>
           <h1 className="big-message">OUIII T&apos;AS ACCEPTÉ !!! 🎉❤️</h1>
         </section>
+
       </main>
 
       <p className="signature">avec amour ✦</p>
