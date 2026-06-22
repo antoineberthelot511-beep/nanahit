@@ -10,6 +10,13 @@ export default function Page() {
 
       const HEART_TONES = ['#C84B5A', '#F7C6C7', '#E18A95', '#A53847', '#D98C95'];
 
+      /* ============ Fond évolutif : blanc → rose au fil des étapes ============ */
+      const BG_STAGES = ['#FFFFFF', '#FDF2F4', '#FBE5E8', '#F9D8DD', '#F6CCD2', '#F4BFC7', '#F2B2BB', '#F0A5B0'];
+      function setBgStage(stage: number) {
+        document.body.style.backgroundColor = BG_STAGES[stage];
+      }
+      setBgStage(0);
+
       function makeHeartSvg(size: number, fill: string): SVGSVGElement {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('viewBox', '0 0 32 29');
@@ -56,6 +63,9 @@ export default function Page() {
       const mainContent = document.getElementById('mainContent') as HTMLElement;
       const quizScreen = document.getElementById('quizScreen') as HTMLElement;
       const quizFeedback = document.getElementById('quizFeedback') as HTMLElement;
+      const stepSuspenseScreen = document.getElementById('stepSuspenseScreen') as HTMLElement;
+      const stepAScreen = document.getElementById('stepAScreen') as HTMLElement;
+      const stepBScreen = document.getElementById('stepBScreen') as HTMLElement;
       const successScreen = document.getElementById('successScreen') as HTMLElement;
 
       /* Pulsation douce du titre principal */
@@ -207,25 +217,40 @@ export default function Page() {
         anime({ targets: quizFeedback, opacity: [0, 1], translateY: [-6, 0], duration: 300, easing: 'easeOutCubic' });
       }
 
-      quizBtnWrong1.addEventListener('click', () => showQuizFeedback("Bonne idée mais non 😅 réessaie !"));
+      quizBtnWrong1.addEventListener('click', () => showQuizFeedback("Quelle idée de merde !!! 😂"));
       quizBtnWrong2.addEventListener('click', () => showQuizFeedback("Sympa comme idée... mais non 😏 réessaie !"));
       quizBtnRight.addEventListener('click', () => goToNext());
 
+      /* ============ Étapes suspense, A & B ============ */
+      const stepSuspenseContinueBtn = document.getElementById('stepSuspenseContinueBtn') as HTMLButtonElement;
+      const stepAContinueBtn = document.getElementById('stepAContinueBtn') as HTMLButtonElement;
+      const stepBContinueBtn = document.getElementById('stepBContinueBtn') as HTMLButtonElement;
+
+      stepSuspenseContinueBtn.addEventListener('click', () => goToNext());
+      stepAContinueBtn.addEventListener('click', () => goToNext());
+      stepBContinueBtn.addEventListener('click', () => goToNext());
+
       /* ============ Séquence ============ */
-      type SeqItem = { type: string; text?: string; sub?: string; showHearts?: boolean };
+      type SeqItem = { type: string; text?: string; sub?: string; showHearts?: boolean; bgStage: number };
 
       const sequence: SeqItem[] = [
-        { type: 'quiz' },
-        { type: 'question', text: "T'es sûre que tu veux savoir ? 😏", sub: "(réfléchis bien... 👀)", showHearts: false },
-        { type: 'question', text: "Vraiment vraiment sûre ?!", sub: "(c'est maintenant ou jamais 😅)", showHearts: false },
-        { type: 'question', text: "Veux-tu être ma copine, Anahit ? 💕", sub: "(prends ton temps, mais pas trop 😌)", showHearts: true },
-        { type: 'final' },
+        { type: 'quiz', bgStage: 1 },
+        { type: 'question', text: "T'es sûre que tu veux savoir ? 😏", sub: "(réfléchis bien... 👀)", showHearts: false, bgStage: 2 },
+        { type: 'question', text: "Vraiment vraiment sûre ?!", sub: "(c'est maintenant ou jamais 😅)", showHearts: false, bgStage: 2 },
+        { type: 'stepSuspense', bgStage: 3 },
+        { type: 'stepA', bgStage: 4 },
+        { type: 'stepB', bgStage: 5 },
+        { type: 'question', text: "Veux-tu être ma copine, Anahit ? 💕", sub: "(prends ton temps, mais pas trop 😌)", showHearts: true, bgStage: 6 },
+        { type: 'final', bgStage: 7 },
       ];
       let seqIndex = 0;
 
       const screenEls: Record<string, HTMLElement> = {
         quiz: quizScreen,
         question: mainContent,
+        stepSuspense: stepSuspenseScreen,
+        stepA: stepAScreen,
+        stepB: stepBScreen,
         final: successScreen,
       };
 
@@ -256,6 +281,8 @@ export default function Page() {
         const item = sequence[seqIndex];
         const nextEl = screenEls[item.type];
         onQuestionScreen = (item.type === 'question');
+
+        setBgStage(item.bgStage);
 
         if (item.showHearts) showHeartsBg();
 
@@ -364,21 +391,11 @@ export default function Page() {
 
       /* ============ Écran d'accueil + musique ============ */
       const coverScreen = document.getElementById('coverScreen') as HTMLElement;
-      const coverHeart = document.getElementById('coverHeart') as HTMLElement;
       const soundToggle = document.getElementById('soundToggle') as HTMLButtonElement;
       const bgMusic = document.getElementById('bgMusic') as HTMLVideoElement;
       const MUSIC_START_TIME = 197;
 
       bgMusic.setAttribute('webkit-playsinline', '');
-
-      anime({
-        targets: coverHeart,
-        scale: [1, 1.15],
-        duration: 750,
-        direction: 'alternate',
-        loop: true,
-        easing: 'easeInOutSine',
-      });
 
       let seekApplied = false;
 
@@ -435,7 +452,6 @@ export default function Page() {
       coverScreen.addEventListener('click', () => {
         attemptPlay();
         soundToggle.hidden = false;
-        anime.remove(coverHeart);
         anime({
           targets: coverScreen,
           opacity: [1, 0],
@@ -469,12 +485,7 @@ export default function Page() {
       <div className="bg-hearts" id="bgHearts" />
 
       <section className="cover" id="coverScreen">
-        <div className="cover-heart" id="coverHeart">
-          <svg viewBox="0 0 32 29" className="heart-icon">
-            <use href="#heart-shape" />
-          </svg>
-        </div>
-        <p className="cover-text">Clique pour commencer 💕</p>
+        <p className="cover-text">Le fameux mystère et boule de gomme</p>
       </section>
 
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
@@ -503,6 +514,25 @@ export default function Page() {
             <button className="btn no" id="quizBtnRight">Encore mystère et boule de gomme</button>
           </div>
           <p className="quiz-feedback" id="quizFeedback" hidden />
+        </section>
+
+        {/* Étape 1 : suspense */}
+        <section className="container" id="stepSuspenseScreen" hidden>
+          <h1 className="title quiz-title">Je voulais te demander en fait...</h1>
+          <button className="btn yes" id="stepSuspenseContinueBtn">...</button>
+        </section>
+
+        {/* Étape 2 : fausse mauvaise nouvelle */}
+        <section className="container" id="stepAScreen" hidden>
+          <h1 className="title quiz-title">Et non, tu seras pas 🤓</h1>
+          <button className="btn yes" id="stepAContinueBtn">...</button>
+        </section>
+
+        {/* Étape 3 : la boutade */}
+        <section className="container" id="stepBScreen" hidden>
+          <h1 className="title quiz-title">Et non, p&apos;tite boutade 😹</h1>
+          <img src="/chat.jpg" alt="" className="step-photo" />
+          <button className="btn yes" id="stepBContinueBtn">...</button>
         </section>
 
         {/* Étapes 3 & 4 : confirmations + demande principale */}

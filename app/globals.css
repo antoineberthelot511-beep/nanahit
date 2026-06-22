@@ -24,7 +24,8 @@ html, body {
 }
 
 body {
-  background: linear-gradient(160deg, var(--cream) 0%, var(--cream-deep) 55%, var(--blush) 100%);
+  background-color: #FFFFFF;
+  transition: background-color 1.2s ease;
   position: relative;
 }
 
@@ -83,12 +84,6 @@ body {
 }
 
 .cover[hidden] { display: none; }
-
-.cover-heart .heart-icon {
-  width: 84px;
-  height: 76px;
-}
-.cover-heart .heart-icon use { fill: var(--raspberry); }
 
 .cover-text {
   font-family: 'Quicksand', sans-serif;
@@ -178,6 +173,15 @@ h1.quiz-title {
 }
 
 .quiz-feedback[hidden] { display: none; }
+
+/* ---------- Étapes A & B ---------- */
+.step-photo {
+  width: 70%;
+  max-width: 260px;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(90, 62, 54, 0.25);
+  margin: 6px 0 28px;
+}
 
 h1.title {
   font-family: 'Caveat', cursive;
