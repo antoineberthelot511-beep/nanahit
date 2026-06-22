@@ -42,7 +42,6 @@
   const noBtn = document.getElementById('noBtn');
   const yesBtn = document.getElementById('yesBtn');
   const mainContent = document.getElementById('mainContent');
-  const gameCatch = document.getElementById('gameCatch');
   const gamePop = document.getElementById('gamePop');
   const successScreen = document.getElementById('successScreen');
 
@@ -200,16 +199,15 @@
 
   const sequence = [
     { type: 'question', text: steps[0], sub: subtitles[0] },
-    { type: 'gameCatch' },
-    { type: 'question', text: steps[1], sub: subtitles[1] },
     { type: 'gamePop' },
+    { type: 'question', text: steps[1], sub: subtitles[1] },
     { type: 'question', text: steps[2], sub: subtitles[2] },
     { type: 'question', text: steps[3], sub: subtitles[3] },
     { type: 'final' }
   ];
   let seqIndex = 0;
 
-  const screenEls = { question: mainContent, gameCatch: gameCatch, gamePop: gamePop, final: successScreen };
+  const screenEls = { question: mainContent, gamePop: gamePop, final: successScreen };
 
   function showScreen(el) {
     el.hidden = false;
@@ -250,8 +248,6 @@
         titleEl.textContent = item.text;
         subtitleEl.textContent = item.sub;
         resetNoYesButtons();
-      } else if (item.type === 'gameCatch') {
-        startGameCatch();
       } else if (item.type === 'gamePop') {
         startGamePop();
       } else if (item.type === 'final') {
@@ -278,105 +274,6 @@
     if (!onQuestionScreen) return;
     goToNext();
   });
-
-  /* ============ Mini-jeu : attrape les cœurs ============ */
-  const catchArea = document.getElementById('catchArea');
-  const basket = document.getElementById('basket');
-  const catchCounter = document.getElementById('catchCounter');
-
-  let catchHearts = [];
-  let caughtCount = 0;
-  let catchSpawnInterval = null;
-  let catchRaf = null;
-
-  function updateCatchCounter() {
-    catchCounter.textContent = `${caughtCount} / 5 cœurs attrapés`;
-  }
-
-  function onCatchPointerMove(e) {
-    const rect = catchArea.getBoundingClientRect();
-    let x = e.clientX - rect.left;
-    x = Math.max(24, Math.min(rect.width - 24, x));
-    basket.style.left = x + 'px';
-  }
-
-  function onCatchTouchMove(e) {
-    if (e.touches && e.touches.length > 0) {
-      e.preventDefault();
-      onCatchPointerMove(e.touches[0]);
-    }
-  }
-
-  function spawnFallingHeart() {
-    const size = 24 + Math.random() * 10;
-    const fill = HEART_TONES[Math.floor(Math.random() * HEART_TONES.length)];
-    const svg = makeHeartSvg(size, fill);
-    svg.classList.add('falling-heart');
-    const areaWidth = catchArea.clientWidth;
-    const x = 20 + Math.random() * Math.max(20, areaWidth - 40);
-    svg.style.left = x + 'px';
-    catchArea.appendChild(svg);
-    catchHearts.push({ el: svg, top: 0, speed: 1.5 + Math.random() * 1.3 });
-  }
-
-  function rectsOverlap(a, b) {
-    return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
-  }
-
-  function catchLoop() {
-    const areaHeight = catchArea.clientHeight;
-    const basketRect = basket.getBoundingClientRect();
-
-    for (let i = catchHearts.length - 1; i >= 0; i--) {
-      const h = catchHearts[i];
-      h.top += h.speed;
-      h.el.style.top = h.top + 'px';
-
-      if (h.top > areaHeight + 20) {
-        h.el.remove();
-        catchHearts.splice(i, 1);
-        continue;
-      }
-
-      const heartRect = h.el.getBoundingClientRect();
-      if (rectsOverlap(heartRect, basketRect)) {
-        h.el.remove();
-        catchHearts.splice(i, 1);
-        caughtCount++;
-        updateCatchCounter();
-        anime({ targets: basket, scale: [1.3, 1], translateX: '-50%', duration: 280, easing: 'easeOutElastic(1, .6)' });
-
-        if (caughtCount >= 5) {
-          stopGameCatch();
-          setTimeout(goToNext, 550);
-          return;
-        }
-      }
-    }
-
-    catchRaf = requestAnimationFrame(catchLoop);
-  }
-
-  function startGameCatch() {
-    caughtCount = 0;
-    catchHearts.forEach((h) => h.el.remove());
-    catchHearts = [];
-    updateCatchCounter();
-    basket.style.left = '50%';
-    catchArea.addEventListener('pointermove', onCatchPointerMove);
-    catchArea.addEventListener('touchmove', onCatchTouchMove, { passive: false });
-    catchSpawnInterval = setInterval(spawnFallingHeart, 650);
-    catchRaf = requestAnimationFrame(catchLoop);
-  }
-
-  function stopGameCatch() {
-    clearInterval(catchSpawnInterval);
-    cancelAnimationFrame(catchRaf);
-    catchArea.removeEventListener('pointermove', onCatchPointerMove);
-    catchArea.removeEventListener('touchmove', onCatchTouchMove);
-    catchHearts.forEach((h) => h.el.remove());
-    catchHearts = [];
-  }
 
   /* ============ Mini-jeu : pop les cœurs ============ */
   const popArea = document.getElementById('popArea');
@@ -520,43 +417,63 @@
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }
 
-  /* Amplification du son via Web Audio API (gain x2). Désactivée sur iOS :
-     le mode silencieux y coupe la sortie de Web Audio mais pas l'élément <audio>,
-     donc on laisse l'audio jouer nativement (volume 1.0) pour garantir le son. */
+  /* Web Audio boost (gain x2) — optionnel, ne doit JAMAIS bloquer le son de base.
+     setupAudioBoost() est appelé APRÈS que play() a réussi. */
   let audioCtx = null;
   let gainNode = null;
 
   function setupAudioBoost() {
     if (audioCtx || isIOS()) return;
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      audioCtx = new AudioCtx();
-      const source = audioCtx.createMediaElementSource(bgMusic);
-      gainNode = audioCtx.createGain();
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtxClass) return;
+      const ctx = new AudioCtxClass();
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      const source = ctx.createMediaElementSource(bgMusic);
+      gainNode = ctx.createGain();
       gainNode.gain.value = 2.0;
       source.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
+      gainNode.connect(ctx.destination);
+      audioCtx = ctx;
+      console.log('[Audio] Web Audio boost activé, state:', ctx.state);
     } catch (err) {
+      console.log('[Audio] Web Audio boost ignoré :', err.message);
       audioCtx = null;
       gainNode = null;
     }
   }
 
-  /* iOS ignore currentTime tant que les métadonnées ne sont pas chargées :
-     on attend loadedmetadata/canplay plutôt que de le fixer trop tôt. */
+  /* Seek conditionnel : ne pas dépasser la durée réelle du fichier. */
   let seekApplied = false;
-  function applySeek() {
-    if (seekApplied || bgMusic.readyState < 1) return;
-    bgMusic.currentTime = MUSIC_START_TIME;
-    seekApplied = true;
-  }
-  bgMusic.addEventListener('loadedmetadata', applySeek);
-  bgMusic.addEventListener('canplay', applySeek);
 
-  /* État du son piloté explicitement (pas via bgMusic.paused/muted, qui changent
-     de façon asynchrone et causaient un décalage avec l'icône affichée).
-     Le son démarre ACTIVÉ. */
+  bgMusic.addEventListener('loadedmetadata', () => {
+    console.log('[Audio] loadedmetadata —',
+      'src:', bgMusic.src,
+      '| duration:', bgMusic.duration,
+      '| error:', bgMusic.error,
+      '| paused:', bgMusic.paused,
+      '| muted:', bgMusic.muted,
+      '| volume:', bgMusic.volume
+    );
+
+    if (!seekApplied) {
+      if (MUSIC_START_TIME < bgMusic.duration) {
+        bgMusic.currentTime = MUSIC_START_TIME;
+        console.log('[Audio] seek → ' + MUSIC_START_TIME + 's');
+      } else {
+        console.warn('[Audio] MUSIC_START_TIME (' + MUSIC_START_TIME + 's) >= duration (' + bgMusic.duration + 's) → démarrage à 0');
+      }
+      seekApplied = true;
+    }
+  });
+
+  bgMusic.addEventListener('error', () => {
+    console.error('[Audio] Erreur de chargement :', bgMusic.error);
+  });
+
+  /* État du son */
   let soundOn = true;
 
   function setIcon() {
@@ -566,25 +483,32 @@
 
   function applyMuteState() {
     bgMusic.muted = !soundOn;
-    if (gainNode) {
-      gainNode.gain.value = soundOn ? 2.0 : 0;
-    }
+    if (gainNode) gainNode.gain.value = soundOn ? 2.0 : 0;
   }
 
+  /* attemptPlay : play() en premier, Web Audio boost en second si play réussit. */
   function attemptPlay() {
-    setupAudioBoost();
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume().catch(() => {});
-    }
+    console.log('[Audio] attemptPlay —',
+      'readyState:', bgMusic.readyState,
+      '| duration:', bgMusic.duration,
+      '| error:', bgMusic.error,
+      '| paused:', bgMusic.paused,
+      '| muted:', bgMusic.muted,
+      '| volume:', bgMusic.volume,
+      '| AudioCtx state:', audioCtx ? audioCtx.state : 'non créé'
+    );
+
     bgMusic.loop = true;
     bgMusic.volume = 1.0;
-    applyMuteState();
-    applySeek();
+    bgMusic.muted = !soundOn;
 
     const playPromise = bgMusic.play();
     if (playPromise && typeof playPromise.then === 'function') {
-      playPromise.catch(() => {
-        // play() rejeté (geste non reconnu, interruption...) : on retente au prochain tap.
+      playPromise.then(() => {
+        console.log('[Audio] play() OK');
+        setupAudioBoost();
+      }).catch((err) => {
+        console.warn('[Audio] play() rejeté :', err.message);
         document.addEventListener('touchend', attemptPlay, { once: true });
         document.addEventListener('click', attemptPlay, { once: true });
       });

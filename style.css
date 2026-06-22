@@ -235,36 +235,6 @@ h1.title {
   margin: 0 0 8px;
 }
 
-/* Mini-jeu : attrape les cœurs */
-#catchArea {
-  position: relative;
-  flex: 1;
-  width: 100%;
-  touch-action: none;
-  overflow: hidden;
-}
-
-.basket {
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  width: 64px;
-  height: 52px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  filter: drop-shadow(0 4px 6px rgba(90,62,54,0.3));
-}
-.basket svg { width: 100%; height: 100%; }
-.basket-handle { fill: none; stroke: var(--raspberry-dark); stroke-width: 2.5; stroke-linecap: round; }
-.basket-body { fill: var(--blush); stroke: var(--raspberry-dark); stroke-width: 2; }
-.basket-weave { fill: none; stroke: var(--raspberry-dark); stroke-width: 1.4; opacity: 0.6; }
-
-.falling-heart {
-  position: absolute;
-  top: 0;
-  pointer-events: none;
-}
-
 /* Mini-jeu : pop les cœurs */
 #popArea {
   position: relative;
