@@ -11,7 +11,7 @@ export default function Page() {
       const HEART_TONES = ['#C84B5A', '#F7C6C7', '#E18A95', '#A53847', '#D98C95'];
 
       /* ============ Fond évolutif : blanc → rose au fil des étapes ============ */
-      const BG_STAGES = ['#FFFFFF', '#FDF2F4', '#FBE5E8', '#F9D8DD', '#F6CCD2', '#F4BFC7', '#F2B2BB', '#F0A5B0'];
+      const BG_STAGES = ['#FFFFFF', '#FDF4F5', '#FBE9EB', '#F9DDE1', '#F8D2D8', '#F6C7CE', '#F4BCC4', '#F2B0BA', '#F0A5B0'];
       function setBgStage(stage: number) {
         document.body.style.backgroundColor = BG_STAGES[stage];
       }
@@ -66,6 +66,7 @@ export default function Page() {
       const stepSuspenseScreen = document.getElementById('stepSuspenseScreen') as HTMLElement;
       const stepAScreen = document.getElementById('stepAScreen') as HTMLElement;
       const stepBScreen = document.getElementById('stepBScreen') as HTMLElement;
+      const stepTeaseScreen = document.getElementById('stepTeaseScreen') as HTMLElement;
       const successScreen = document.getElementById('successScreen') as HTMLElement;
 
       /* Pulsation douce du titre principal */
@@ -226,9 +227,12 @@ export default function Page() {
       const stepAContinueBtn = document.getElementById('stepAContinueBtn') as HTMLButtonElement;
       const stepBContinueBtn = document.getElementById('stepBContinueBtn') as HTMLButtonElement;
 
+      const stepTeaseContinueBtn = document.getElementById('stepTeaseContinueBtn') as HTMLButtonElement;
+
       stepSuspenseContinueBtn.addEventListener('click', () => goToNext());
       stepAContinueBtn.addEventListener('click', () => goToNext());
       stepBContinueBtn.addEventListener('click', () => goToNext());
+      stepTeaseContinueBtn.addEventListener('click', () => goToNext());
 
       /* ============ Séquence ============ */
       type SeqItem = { type: string; text?: string; sub?: string; showHearts?: boolean; bgStage: number };
@@ -240,8 +244,9 @@ export default function Page() {
         { type: 'stepSuspense', bgStage: 3 },
         { type: 'stepA', bgStage: 4 },
         { type: 'stepB', bgStage: 5 },
-        { type: 'question', text: "Veux-tu être ma copine, Anahit ? 💕", sub: "(prends ton temps, mais pas trop 😌)", showHearts: true, bgStage: 6 },
-        { type: 'final', bgStage: 7 },
+        { type: 'stepTease', bgStage: 6 },
+        { type: 'question', text: "Veux-tu être ma copine, Anahit ? 💕", sub: "(prends ton temps, mais pas trop 😌)", showHearts: true, bgStage: 7 },
+        { type: 'final', bgStage: 8 },
       ];
       let seqIndex = 0;
 
@@ -251,6 +256,7 @@ export default function Page() {
         stepSuspense: stepSuspenseScreen,
         stepA: stepAScreen,
         stepB: stepBScreen,
+        stepTease: stepTeaseScreen,
         final: successScreen,
       };
 
@@ -388,6 +394,14 @@ export default function Page() {
         for (let i = 0; i < 18; i++) spawnRainHeart();
         setInterval(spawnRainHeart, 170);
       }
+
+      /* ============ Bonus ============ */
+      const bonusScreen = document.getElementById('bonusScreen') as HTMLElement;
+      const bonusBtn = document.getElementById('bonusBtn') as HTMLButtonElement;
+
+      bonusBtn.addEventListener('click', () => {
+        hideScreen(successScreen, () => showScreen(bonusScreen));
+      });
 
       /* ============ Écran d'accueil + musique ============ */
       const coverScreen = document.getElementById('coverScreen') as HTMLElement;
@@ -535,6 +549,12 @@ export default function Page() {
           <button className="btn yes" id="stepBContinueBtn">...</button>
         </section>
 
+        {/* Étape 4 : transition avant la demande */}
+        <section className="container" id="stepTeaseScreen" hidden>
+          <h1 className="title quiz-title">Bon, je vais finalement te dire, comme ça tu te tourneras plus les pouces 😉</h1>
+          <button className="btn yes" id="stepTeaseContinueBtn">...</button>
+        </section>
+
         {/* Étapes 3 & 4 : confirmations + demande principale */}
         <section className="container" id="mainContent" hidden>
           <h1 className="title" id="title">
@@ -552,6 +572,13 @@ export default function Page() {
         {/* Étape 5 : finale */}
         <section className="success" id="successScreen" hidden>
           <h1 className="big-message">OUIII T&apos;AS ACCEPTÉ !!! 🎉❤️</h1>
+          <button className="btn yes bonus-btn" id="bonusBtn">Petit bonus 🤓</button>
+        </section>
+
+        {/* Étape 6 : bonus */}
+        <section className="container" id="bonusScreen" hidden>
+          <h1 className="title quiz-title">Et au fait, les stickers c&apos;était pour ça, si t&apos;avais pas compris 🤓</h1>
+          <img src="/capture.png" alt="" className="step-photo" />
         </section>
 
       </main>

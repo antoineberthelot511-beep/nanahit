@@ -208,10 +208,11 @@ h1.title {
 .buttons {
   position: relative;
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: 30px;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
   min-height: 120px;
   width: 100%;
 }
@@ -272,6 +273,12 @@ h1.title {
   text-shadow: 0 4px 16px rgba(255,255,255,0.8);
 }
 
+.bonus-btn {
+  position: relative;
+  z-index: 6;
+  margin-top: 28px;
+}
+
 .rain-heart {
   position: absolute;
   top: -12%;
@@ -314,7 +321,8 @@ h1.title {
 
 @media (max-width: 480px) {
   .btn { padding: 13px 26px; }
-  .buttons { gap: 18px; }
+  .buttons { gap: 12px; }
+  .buttons .btn { min-width: 86px; padding: 12px 20px; }
   .subtitle { margin-bottom: 36px; }
   h1.title { transform: translateX(-4px) rotate(-1deg); }
   .heart-photo { width: 76px; height: 68px; }
