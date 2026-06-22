@@ -206,7 +206,6 @@ export default function Page() {
 
       const sequence = [
         { type: 'question', text: steps[0], sub: subtitles[0] },
-        { type: 'gamePop' },
         { type: 'question', text: steps[1], sub: subtitles[1] },
         { type: 'question', text: steps[2], sub: subtitles[2] },
         { type: 'question', text: steps[3], sub: subtitles[3] },
@@ -216,7 +215,6 @@ export default function Page() {
 
       const screenEls: Record<string, HTMLElement> = {
         question: mainContent,
-        gamePop: gamePop,
         final: successScreen,
       };
 
@@ -253,8 +251,6 @@ export default function Page() {
             titleEl.textContent = item.text!;
             subtitleEl.textContent = item.sub!;
             resetNoYesButtons();
-          } else if (item.type === 'gamePop') {
-            startGamePop();
           } else if (item.type === 'final') {
             startFinale();
           }
@@ -279,56 +275,6 @@ export default function Page() {
         if (!onQuestionScreen) return;
         goToNext();
       });
-
-      /* ============ Mini-jeu : pop les cœurs ============ */
-      const popArea = document.getElementById('popArea') as HTMLElement;
-      const popCounter = document.getElementById('popCounter') as HTMLElement;
-      const BUBBLE_COUNT = 14;
-      let popRemaining = 0;
-
-      function updatePopCounter() {
-        popCounter.textContent = popRemaining > 0
-          ? `${popRemaining} cœur${popRemaining > 1 ? 's' : ''} à éclater`
-          : 'Tout éclaté !';
-      }
-
-      function onPopBubble(e: Event) {
-        e.preventDefault();
-        const el = e.currentTarget as SVGSVGElement;
-        if (el.classList.contains('popped')) return;
-        el.classList.add('popped');
-        popRemaining--;
-        updatePopCounter();
-        setTimeout(() => el.remove(), 260);
-        if (popRemaining <= 0) {
-          setTimeout(goToNext, 550);
-        }
-      }
-
-      function startGamePop() {
-        popArea.innerHTML = '';
-        popRemaining = BUBBLE_COUNT;
-        updatePopCounter();
-
-        const rect = popArea.getBoundingClientRect();
-        const w = rect.width || window.innerWidth;
-        const h = rect.height || window.innerHeight * 0.5;
-
-        for (let i = 0; i < BUBBLE_COUNT; i++) {
-          const size = 26 + Math.random() * 18;
-          const fill = HEART_TONES[Math.floor(Math.random() * HEART_TONES.length)];
-          const svg = makeHeartSvg(size, fill);
-          svg.classList.add('bubble');
-          const x = 16 + Math.random() * Math.max(20, w - 50);
-          const y = 16 + Math.random() * Math.max(20, h - 50);
-          svg.style.left = x + 'px';
-          svg.style.top = y + 'px';
-          svg.style.animationDelay = (Math.random() * 2) + 's';
-          svg.addEventListener('pointerdown', onPopBubble);
-          svg.addEventListener('touchstart', onPopBubble, { passive: false });
-          popArea.appendChild(svg);
-        }
-      }
 
       /* ============ Finale : confetti cœurs + pluie de cœurs/photos ============ */
       let heartShape: any = null;
@@ -542,13 +488,6 @@ export default function Page() {
             <button className="btn yes" id="yesBtn">Oui</button>
             <button className="btn no" id="noBtn">Non</button>
           </div>
-        </section>
-
-        <section className="game-screen" id="gamePop" hidden>
-          <h2 className="game-title">Mini-jeu : pop les cœurs</h2>
-          <p className="game-sub">Éclate-les tous avant de continuer.</p>
-          <p className="game-counter" id="popCounter">14 cœurs à éclater</p>
-          <div id="popArea" />
         </section>
 
         <section className="success" id="successScreen" hidden>

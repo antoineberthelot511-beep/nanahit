@@ -217,59 +217,6 @@ h1.title {
 
 .btn.no.gone { pointer-events: none; }
 
-/* ---------- Écrans mini-jeux ---------- */
-.game-title {
-  font-family: 'Caveat', cursive;
-  font-weight: 700;
-  color: var(--raspberry-dark);
-  font-size: clamp(1.6rem, 6vw, 2.5rem);
-  margin: 4px 0 4px;
-  text-shadow: 0 2px 8px rgba(255,255,255,0.6);
-}
-
-.game-sub {
-  margin: 0 0 6px;
-  opacity: 0.75;
-  font-size: 0.95rem;
-}
-
-.game-counter {
-  font-weight: 700;
-  color: var(--raspberry-dark);
-  margin: 0 0 8px;
-}
-
-/* Mini-jeu : pop les cœurs */
-#popArea {
-  position: relative;
-  flex: 1;
-  width: 100%;
-  touch-action: none;
-}
-
-.bubble {
-  position: absolute;
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-  animation: bobble 2.4s ease-in-out infinite;
-}
-
-@keyframes bobble {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
-}
-
-.bubble.popped {
-  animation: popOut 0.25s ease forwards;
-  pointer-events: none;
-}
-
-@keyframes popOut {
-  0%   { transform: scale(1); opacity: 1; }
-  100% { transform: scale(1.8); opacity: 0; }
-}
-
 /* ---------- Cœurs (icônes SVG réutilisées) ---------- */
 .heart-icon {
   display: block;
@@ -335,5 +282,4 @@ h1.title {
   .subtitle { margin-bottom: 36px; }
   h1.title { transform: translateX(-4px) rotate(-1deg); }
   .heart-photo { width: 76px; height: 68px; }
-  .game-title { margin-top: 8px; }
 }
